@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setDateOfMeal();
         handleMealTimer();
         setUpCameraService();
-        setupSpinners();
+        // setupSpinners();
         mFoodViewModel = new ViewModelProvider(this).get(FoodViewModel.class);
         mFoodViewModel.getAllFood().observe(this, newData -> {
             newData.forEach( item -> {
@@ -242,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 new Date(),
                 0.0,
                 binding.foodItemTextView.getText().toString(),
-                binding.foodQtyTextView.getText().toString(),
+                "Dinner",
                 0.0,
                 "testMetric",
                 (int)mealConsumptionMilliseconds);
@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         getApplicationContext().deleteFile(photoFile.getAbsolutePath());
 
     }
-
+    /**
     private void setupSpinners(){
         binding.foodCatSpinner.setOnItemSelectedListener(this);
         ArrayAdapter foodCatSpinnerAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, foodCategoryList);
@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         ArrayAdapter mealSpinnerAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, mealList);
         mealSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.mealSpinner.setAdapter(mealSpinnerAdapter);
-    }
+    }*/
 
 
     //as startActivityForResult is deprecated, using the ActivityResultLauncher
@@ -357,7 +357,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private void setDateOfMeal() {
         Date date = Calendar.getInstance().getTime();
-        DateFormat formatter = new SimpleDateFormat("EEE, d MMMM yyyy", Locale.getDefault());
+        DateFormat formatter = new SimpleDateFormat("EEE dd-MM-yyyy", Locale.getDefault());
         binding.dateTextView.setText(formatter.format(date));
     }
     private void setDateOfPhoto() {
@@ -493,8 +493,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      } catch (IOException e) {
      // TODO Handle the exception
      }
-
-
 
      }*/
 }
