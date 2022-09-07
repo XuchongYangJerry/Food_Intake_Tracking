@@ -5,9 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    tools:layout_editor_absoluteX="0dp"
-    tools:layout_editor_absoluteY="0dp">
+    tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline1"
@@ -72,9 +70,10 @@
     <TextView
         android:id="@+id/foodItemLabel"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="36dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="20dp"
+        android:gravity="center"
         android:text="@string/food_item"
         android:textSize="14sp"
         app:layout_constraintBottom_toTopOf="@+id/consumePercentLabel"
@@ -87,27 +86,15 @@
         android:id="@+id/foodItemTextView"
         android:layout_width="0dp"
         android:layout_height="36dp"
-        android:layout_marginTop="8dp"
         android:linksClickable="false"
         android:maxLines="1"
         android:text="@string/defaultTextValue"
         android:textSize="14sp"
         app:layout_constraintEnd_toStartOf="@+id/guideline7"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/guideline6"
-        app:layout_constraintTop_toTopOf="@+id/guideline1"
+        app:layout_constraintTop_toTopOf="@+id/foodItemLabel"
         tools:ignore="TouchTargetSizeCheck" />
-
-    <TextView
-        android:id="@+id/consumePercentLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:text="@string/consumption"
-        app:layout_constraintBottom_toTopOf="@+id/photoTimestampLabel"
-        app:layout_constraintEnd_toStartOf="@+id/guideline6"
-        app:layout_constraintHorizontal_bias="0.407"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <!--    <Spinner-->
 <!--        android:id="@+id/foodCatSpinner"-->
@@ -159,17 +146,28 @@
 <!--        app:layout_constraintStart_toStartOf="@+id/guideline4"-->
 <!--        app:layout_constraintTop_toTopOf="@+id/foodQtyLabel" />-->
 
+    <TextView
+        android:id="@+id/consumePercentLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_marginBottom="12dp"
+        android:gravity="center"
+        android:text="@string/consumption"
+        app:layout_constraintBottom_toTopOf="@+id/photoTimestampLabel"
+        app:layout_constraintEnd_toStartOf="@+id/guideline6"
+        app:layout_constraintHorizontal_bias="0.407"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <RadioGroup
         android:id="@+id/consumpRadioGroup"
         android:layout_width="0dp"
         android:layout_height="36dp"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="8dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toStartOf="@+id/guideline7"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline6"
-        app:layout_constraintTop_toBottomOf="@+id/foodItemTextView">
+        app:layout_constraintTop_toTopOf="@+id/consumePercentLabel">
 
         <RadioButton
             android:id="@+id/radio025"
@@ -197,9 +195,9 @@
             android:id="@+id/radio100"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:checked="true"
             android:text="Full"
-            android:textSize="12sp"
-            android:checked="true"/>
+            android:textSize="12sp" />
     </RadioGroup>
 
     <TextView

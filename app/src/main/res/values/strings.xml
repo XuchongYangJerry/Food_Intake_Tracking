@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Food Intake Tracking</string>
+    <string name="app_name">Glook3</string>
     <string name="meal_duration">Meal Duration:</string>
     <string name="food_item">Food Item:</string>
     <string name="meal">Meal:</string>
