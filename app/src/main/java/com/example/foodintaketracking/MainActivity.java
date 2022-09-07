@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         // Upload tensorflow file
         LocalModel localModel = new LocalModel.Builder()
-                        .setAssetFilePath("mobilenetv2_extra_labels_1.tflite")
+                        .setAssetFilePath("model.tflite")
                         .build();
 
         binding.recognitionButton.setOnClickListener(new View.OnClickListener() {
@@ -145,8 +145,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         });
             }
         });
-
-
 
 
         if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
