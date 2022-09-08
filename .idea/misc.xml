@@ -4,7 +4,18 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/drawable/button_background_red.xml" value="0.155" />
+        <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/drawable/shape_rectangle.xml" value="0.162" />
+        <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/layout/activity_foodhistory.xml" value="0.335" />
         <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/layout/activity_main.xml" value="0.335" />
+        <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/layout/app_bar_main.xml" value="0.25764596848934196" />
+        <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/layout/content_main.xml" value="0.3385416666666667" />
+        <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/layout/fragment_add_food.xml" value="0.3375" />
+        <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/layout/fragment_camera.xml" value="0.3380208333333333" />
+        <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/layout/fragment_food_history.xml" value="0.3385416666666667" />
+        <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/layout/fragment_glucose_report.xml" value="0.3375" />
+        <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/layout/fragment_recommendation.xml" value="0.3375" />
+        <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/menu/navigation_menu.xml" value="0.27735042735042736" />
+        <entry key="..\:/Android_project/FoodIntakeTracking/app/src/main/res/menu/toolbar_menu.xml" value="0.3385416666666667" />
       </map>
     </option>
   </component>

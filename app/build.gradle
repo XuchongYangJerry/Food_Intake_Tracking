@@ -64,4 +64,11 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite:2.9.0'
     implementation 'org.tensorflow:tensorflow-lite-gpu:2.9.0'
 
+    // Bottom Navigation
+    implementation 'androidx.fragment:fragment:1.5.2'
+    implementation 'androidx.navigation:navigation-fragment:2.5.2'
+    implementation 'androidx.navigation:navigation-ui:2.5.2'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.5.1'
+
 }

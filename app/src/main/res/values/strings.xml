@@ -11,4 +11,8 @@
     <string name="defaultTime">00:00:00</string>
     <string name="defaultPercent">0%</string>
     <string name="defaultQuantity">0</string>
+    <string name="add_food">Add Food</string>
+    <string name="food_history">Food History</string>
+    <string name="recommend">Recommend</string>
+    <string name="glucose_report">Glucose Report</string>
 </resources>

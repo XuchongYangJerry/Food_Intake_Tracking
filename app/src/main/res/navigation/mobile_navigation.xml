@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/AddFoodFragment">
+
+    <fragment
+        android:id="@+id/AddFoodFragment"
+        android:name="com.example.foodintaketracking.AddFoodFragment"
+        android:label="Add Food" />
+    <fragment
+        android:id="@+id/FoodHistoryFragment"
+        android:name="com.example.foodintaketracking.FoodHistoryFragment"
+        android:label="Food History" />
+    <fragment
+        android:id="@+id/RecommendationFragment"
+        android:name="com.example.foodintaketracking.RecommendationFragment"
+        android:label="Recommendation" />
+    <fragment
+        android:id="@+id/GlucoseReportFragment"
+        android:name="com.example.foodintaketracking.GlucoseReportFragment"
+        android:label="Glucose Report" />
+</navigation>

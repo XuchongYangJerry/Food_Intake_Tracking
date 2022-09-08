@@ -1,22 +1,7 @@
 package com.example.foodintaketracking;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.FileProvider;
-import androidx.exifinterface.media.ExifInterface;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
+import static android.app.Activity.RESULT_OK;
+import static android.content.Context.MODE_PRIVATE;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -33,29 +18,31 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.opengl.GLU;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
-import com.example.foodintaketracking.databinding.ActivityMainBinding;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
+import androidx.exifinterface.media.ExifInterface;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.example.foodintaketracking.databinding.FragmentAddFoodBinding;
 import com.example.foodintaketracking.dbProvider.Food;
 import com.example.foodintaketracking.dbProvider.FoodViewModel;
-//import com.example.foodintaketracking.ml.InceptionFloat;
-//import com.example.foodintaketracking.ml.Lite;
-//import com.example.foodintaketracking.ml.CkptExtraLabel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.common.InputImage;
@@ -64,38 +51,19 @@ import com.google.mlkit.vision.label.ImageLabeler;
 import com.google.mlkit.vision.label.ImageLabeling;
 import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions;
 
-
-import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.support.image.TensorImage;
-import org.tensorflow.lite.support.label.Category;
-import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
-import org.tensorflow.lite.support.label.Category;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import org.tensorflow.lite.Interpreter;
-//import org.tensorflow.lite.gpu.CompatibilityList;
-//import org.tensorflow.lite.gpu.GpuDelegate;
-
-
-public class MainActivity extends AppCompatActivity {
-
-    private ActivityMainBinding binding;
-    /**
+public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelectedListener{
+    private FragmentAddFoodBinding binding;
     private long mealConsumptionMilliseconds = 0;
     // private boolean isMealTimerRunning = false;
     //String photoTimestamp = "";
@@ -105,80 +73,23 @@ public class MainActivity extends AppCompatActivity {
     Handler handler;
     long startMilliSecs;
     private FoodViewModel mFoodViewModel;
-//    String[] mealList = {"Breakfast", "Lunch", "Snack", "Dinner"};
-//    String[] foodCategoryList = {"Grains", "Fruits", "Vegetables", "Fish & Meats", "Dairy", "Sugars & Oils", "Others"};
+    //    String[] mealList = {"Breakfast", "Lunch", "Snack", "Dinner"};
+    //    String[] foodCategoryList = {"Grains", "Fruits", "Vegetables", "Fish & Meats", "Dairy", "Sugars & Oils", "Others"};
     int imageSize = 224;
     Interpreter tflite;
-    String outputText = "";*/
+    String outputText = "";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
+
+
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        binding = FragmentAddFoodBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
-        setContentView(view);
-        // replaceFragment(new AddFoodFragment());
 
-        setSupportActionBar(binding.appBar.toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.AddFoodFragment,
-                R.id.RecommendationFragment,
-                R.id.GlucoseReportFragment,
-                R.id.FoodHistoryFragment)
-                .build();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        NavHostFragment navHostFragment = (NavHostFragment)
-                fragmentManager.findFragmentById(R.id.nav_host_fragment);
-        NavController navController = navHostFragment.getNavController();
-        //Sets up a NavigationView for use with a NavController.
-        NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
-        //Sets up a Toolbar for use with a NavController.
-        NavigationUI.setupWithNavController(binding.appBar.toolbar, navController, appBarConfiguration);
-
-        binding.bottomNavigation.setLabelVisibilityMode(NavigationBarView.LABEL_VISIBILITY_LABELED);
-
-        /**
-        binding.bottomNavigation.setOnItemSelectedListener(item -> {
-
-                    switch (item.getItemId()) {
-
-                        case R.id.AddFoodFragment:
-                            replaceFragment(new AddFoodFragment()); break;
-                        case R.id.RecommendationFragment:
-                            replaceFragment(new RecommendationFragment()); break;
-                        case R.id.GlucoseReportFragment:
-                            replaceFragment(new GlucoseReportFragment()); break;
-                        case R.id.FoodHistoryFragment:
-                            replaceFragment(new FoodHistoryFragment()); break;
-                    }
-                    return true;
-                });*/
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                break;
-        }
-        return true;
-    }
-    /**
-    public void replaceFragment(Fragment fragment){
-        FragmentManager fragmentmanager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentmanager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
-        fragmentTransaction.commit();
-
-    }*/
-
-        /**
         // Upload tensorflow file
         LocalModel localModel = new LocalModel.Builder()
-                        .setAssetFilePath("model.tflite")
-                        .build();
+                .setAssetFilePath("mobilenetv2_extra_labels_1.tflite")
+                .build();
 
         binding.recognitionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -218,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (getActivity().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.CAMERA}, 100);
         }
 
@@ -231,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         setUpCameraService();
         // setupSpinners();
         mFoodViewModel = new ViewModelProvider(this).get(FoodViewModel.class);
-        mFoodViewModel.getAllFood().observe(this, newData -> {
+        mFoodViewModel.getAllFood().observe(getActivity(), newData -> {
             newData.forEach( item -> {
                 Log.i(TAG, item.getFoodEatenAt().toString());
             });
@@ -241,25 +152,34 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 saveFoodToRoom();
-                Snackbar.make(view, "Food item has been added to the database", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(getActivity().findViewById(android.R.id.content), "Food item has been added to the database", Snackbar.LENGTH_SHORT)
+                        .setAction("OK", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                            }
+                        })
+                        .show();
             }
         });
+
+        return view;
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         saveDataSharedPreferences();
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         restoreDataSharedPreferences();
     }
 
     private void saveDataSharedPreferences(){
-        SharedPreferences sharedPreferences = getSharedPreferences("InstanceData",MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("InstanceData",MODE_PRIVATE);
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
         myEdit.putLong("startMilliSecs", startMilliSecs);
         myEdit.putLong("mealConsumptionMilliseconds", mealConsumptionMilliseconds);
@@ -271,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void restoreDataSharedPreferences(){
-        SharedPreferences sharedPreferences = getSharedPreferences("InstanceData", MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("InstanceData", MODE_PRIVATE);
         startMilliSecs = sharedPreferences.getLong("startMilliSecs", 0L);
         mealConsumptionMilliseconds = sharedPreferences.getLong("mealConsumptionMilliseconds", 0L);
         isMealTimerRunning = sharedPreferences.getBoolean("isMealTimerRunning", false);
@@ -293,9 +213,9 @@ public class MainActivity extends AppCompatActivity {
         binding.foodCaptureButton.setOnClickListener(v -> {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             photoFile = getRandomFileUri(true);
-            Uri fileProvider = FileProvider.getUriForFile(this, getPackageName(), photoFile);
+            Uri fileProvider = FileProvider.getUriForFile(getContext(), getActivity().getPackageName(), photoFile);
             intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
-            if (intent.resolveActivity(getPackageManager()) != null) {
+            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
                 // Start the image capture intent to take photo
                 //startActivityForResult(intent, 1001);
                 cameraResultLauncher.launch(intent);
@@ -320,31 +240,29 @@ public class MainActivity extends AppCompatActivity {
         // getApplicationContext().deleteFile(photoFile.getAbsolutePath());
 
     }
-    */
-
     /**
-    private void setupSpinners(){
-        binding.foodCatSpinner.setOnItemSelectedListener(this);
-        ArrayAdapter foodCatSpinnerAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, foodCategoryList);
-        foodCatSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.foodCatSpinner.setAdapter(foodCatSpinnerAdapter);
+     private void setupSpinners(){
+     binding.foodCatSpinner.setOnItemSelectedListener(this);
+     ArrayAdapter foodCatSpinnerAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, foodCategoryList);
+     foodCatSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+     binding.foodCatSpinner.setAdapter(foodCatSpinnerAdapter);
 
-        binding.mealSpinner.setOnItemSelectedListener(this);
-        ArrayAdapter mealSpinnerAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, mealList);
-        mealSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.mealSpinner.setAdapter(mealSpinnerAdapter);
-    }*/
+     binding.mealSpinner.setOnItemSelectedListener(this);
+     ArrayAdapter mealSpinnerAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, mealList);
+     mealSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+     binding.mealSpinner.setAdapter(mealSpinnerAdapter);
+     }*/
 
-    /**
+
     //as startActivityForResult is deprecated, using the ActivityResultLauncher
     //callback for handling the results of camera image capture session
     ActivityResultLauncher<Intent> cameraResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK) {
-                // by this point we have the camera photo on disk
-                //    Bitmap photo = (Bitmap) result.getData();
-                //    imageView.setImageBitmap(photo);
-                    SharedPreferences sharedPreferences = getSharedPreferences("InstanceData", MODE_PRIVATE);
+                    // by this point we have the camera photo on disk
+                    //    Bitmap photo = (Bitmap) result.getData();
+                    //    imageView.setImageBitmap(photo);
+                    SharedPreferences sharedPreferences = getActivity().getSharedPreferences("InstanceData", MODE_PRIVATE);
                     startMilliSecs = sharedPreferences.getLong("startMilliSecs", 0L);
                     mealConsumptionMilliseconds = sharedPreferences.getLong("mealConsumptionMilliseconds", 0L);
                     isMealTimerRunning = sharedPreferences.getBoolean("isMealTimerRunning", false);
@@ -352,10 +270,10 @@ public class MainActivity extends AppCompatActivity {
                     boolean isImageSet = setFoodImageToView(photoFile);
                     setDateOfPhoto();
                     if(!isImageSet){
-                        Toast.makeText(this, "There was an error capturing the image" , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "There was an error capturing the image" , Toast.LENGTH_SHORT).show();
                     }
                 } else { // Result was a failure
-                    Toast.makeText(this, "Error taking picture", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Error taking picture", Toast.LENGTH_SHORT).show();
                 }
             }
     );
@@ -416,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
             photoTimestamp = "temporary";
         }
         String TAG = "FoodDetection";
-        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
+        File mediaStorageDir = new File(getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
         //File mediaStorageDir = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), TAG);
 
         if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
@@ -485,7 +403,7 @@ public class MainActivity extends AppCompatActivity {
     public void onNothingSelected(AdapterView<?> adapterView) {
 
     }
-    */
+
 
     /**
      public void classifyImage(Bitmap image){
@@ -567,4 +485,12 @@ public class MainActivity extends AppCompatActivity {
 
      }*/
 
+
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
 }
