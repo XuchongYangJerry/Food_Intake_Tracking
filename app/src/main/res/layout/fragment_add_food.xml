@@ -75,7 +75,6 @@
         android:gravity="center"
         android:text="@string/food_item"
         android:textSize="14sp"
-        android:fontFamily="@font/comic"
         app:layout_constraintBottom_toTopOf="@+id/consumePercentLabel"
         app:layout_constraintEnd_toStartOf="@+id/guideline6"
         app:layout_constraintHorizontal_bias="0.281"
@@ -90,7 +89,7 @@
         android:maxLines="1"
         android:text=""
         android:textSize="14sp"
-        android:fontFamily="@font/comic"
+        android:inputType="textAutoComplete"
         app:layout_constraintEnd_toStartOf="@+id/guideline7"
         app:layout_constraintStart_toStartOf="@+id/guideline6"
         app:layout_constraintTop_toTopOf="@+id/foodItemLabel"
@@ -154,7 +153,6 @@
         android:layout_marginBottom="20dp"
         android:gravity="center"
         android:text="@string/consumption"
-        android:fontFamily="@font/comic"
         app:layout_constraintBottom_toTopOf="@+id/photoTimestampLabel"
         app:layout_constraintEnd_toStartOf="@+id/guideline6"
         app:layout_constraintHorizontal_bias="0.407"
@@ -209,7 +207,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:text="@string/photo_timestamp"
-        android:fontFamily="@font/comic"
         app:layout_constraintBottom_toTopOf="@+id/mealDurLabel"
         app:layout_constraintEnd_toStartOf="@+id/guideline6"
         app:layout_constraintStart_toStartOf="parent" />
@@ -228,14 +225,12 @@
         app:layout_constraintTop_toTopOf="@+id/photoTimestampLabel"
         app:layout_constraintVertical_bias="0.0" />
 
-
     <TextView
         android:id="@+id/dateTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="5dp"
-        android:fontFamily="@font/comic"
         android:text="#date "
         android:textSize="18sp"
         android:textStyle="bold"
@@ -248,7 +243,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:text="Meal Duration:"
-        android:fontFamily="@font/comic"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toStartOf="@+id/mealDurTextView"
         app:layout_constraintHorizontal_bias="0.36"
@@ -286,7 +280,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/transparent"
-        android:fontFamily="@font/comic"
         android:minWidth="0dp"
         android:minHeight="0dp"
         android:text="Save"
@@ -310,18 +303,18 @@
         app:srcCompat="@android:drawable/ic_menu_camera" />
 
 
-    <ImageButton
-        android:id="@+id/recognitionButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@drawable/button_background_blue"
-        android:foregroundTint="@color/black"
-        app:layout_constraintBottom_toBottomOf="@id/guideline5"
-        app:layout_constraintEnd_toStartOf="@+id/guideline7"
-        app:layout_constraintStart_toEndOf="@id/foodCaptureButton"
-        app:layout_constraintTop_toTopOf="@+id/guideline4"
-        app:layout_constraintVertical_bias="1.0"
-        app:srcCompat="@android:drawable/ic_menu_search" />
+<!--    <ImageButton-->
+<!--        android:id="@+id/recognitionButton"-->
+<!--        android:layout_width="50dp"-->
+<!--        android:layout_height="50dp"-->
+<!--        android:background="@drawable/button_background_blue"-->
+<!--        android:foregroundTint="@color/black"-->
+<!--        app:layout_constraintBottom_toBottomOf="@id/guideline5"-->
+<!--        app:layout_constraintEnd_toStartOf="@+id/guideline7"-->
+<!--        app:layout_constraintStart_toEndOf="@id/foodCaptureButton"-->
+<!--        app:layout_constraintTop_toTopOf="@+id/guideline4"-->
+<!--        app:layout_constraintVertical_bias="1.0"-->
+<!--        app:srcCompat="@android:drawable/ic_menu_search" />-->
 
     <ImageButton
         android:id="@+id/playPauseMealButton"
@@ -339,15 +332,27 @@
 
     <TextView
         android:id="@+id/RecognitionResult"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:text="Recognition result"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/guideline4"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.701"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/clearButton"
+        app:layout_constraintStart_toStartOf="@id/guideline6"
+        app:layout_constraintTop_toTopOf="@+id/guideline3" />
+
+    <ImageButton
+        android:id="@+id/clearButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/button_background_blue"
+        android:foregroundTint="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/guideline4"
+        app:layout_constraintEnd_toEndOf="@id/guideline7"
+        app:layout_constraintStart_toEndOf="@id/RecognitionResult"
         app:layout_constraintTop_toTopOf="@+id/guideline3"
-        app:layout_constraintVertical_bias="0.489" />
+        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"/>
+
 
     <LinearLayout
         android:layout_width="match_parent"

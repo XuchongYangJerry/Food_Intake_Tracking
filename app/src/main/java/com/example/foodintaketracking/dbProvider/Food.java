@@ -35,7 +35,7 @@ public class Food {
     private String foodCategory;
 
     @ColumnInfo(name = "foodQty")
-    private Double foodQty;
+    private int foodQty;
 
     @ColumnInfo(name = "foodQtyMetric")
     private String foodQtyMetric;
@@ -43,7 +43,7 @@ public class Food {
     @ColumnInfo(name = "foodDuration")
     private int foodDuration;
 
-    public Food(String foodName, String foodImgFilePath, Date foodEatenAt, Double foodEatenPercent, String foodDesc, String foodCategory, Double foodQty, String foodQtyMetric, int foodDuration) {
+    public Food(String foodName, String foodImgFilePath, Date foodEatenAt, Double foodEatenPercent, String foodDesc, String foodCategory, int foodQty, String foodQtyMetric, int foodDuration) {
         this.foodName = foodName;
         this.foodImgFilePath = foodImgFilePath;
         this.foodEatenAt = foodEatenAt;
@@ -112,11 +112,11 @@ public class Food {
         this.foodCategory = foodCategory;
     }
 
-    public Double getFoodQty() {
+    public int getFoodQty() {
         return foodQty;
     }
 
-    public void setFoodQty(Double foodQty) {
+    public void setFoodQty(int foodQty) {
         this.foodQty = foodQty;
     }
 

@@ -17,6 +17,14 @@ public class FoodHistoryFragment extends Fragment {
         binding = FragmentFoodHistoryBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
+
+
+
+
+
+
+
+
         return view;
     }
     @Override
