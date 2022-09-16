@@ -12,13 +12,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -52,28 +49,17 @@ import com.google.mlkit.vision.label.ImageLabel;
 import com.google.mlkit.vision.label.ImageLabeler;
 import com.google.mlkit.vision.label.ImageLabeling;
 import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions;
-import com.google.mlkit.vision.objects.DetectedObject;
-import com.google.mlkit.vision.objects.ObjectDetection;
-// import com.google.mlkit.vision.objects.ObjectDetector;
-import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions;
-// import com.example.foodintaketracking.ml.Mobilenetv2ExtraLabels1;
+import com.example.foodintaketracking.ml.CkptR50x1Mobilenetv2ExtraLabels1;
 
-import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
 import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.support.label.Category;
-import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
-import org.tensorflow.lite.task.vision.detector.Detection;
-import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -93,7 +79,7 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
     //    String[] foodCategoryList = {"Grains", "Fruits", "Vegetables", "Fish & Meats", "Dairy", "Sugars & Oils", "Others"};
     int imageSize = 224;
     Interpreter tflite;
-    String outputText = "";
+
     Bitmap recognitionImage;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -148,191 +134,64 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
         return view;
     }
 
-    /**
-    private void runObjectDetection(Bitmap bitmap) {
-        // Step 1: Create TFLite's TensorImage object
-        TensorImage image = TensorImage.fromBitmap(bitmap);
-
-        // Step 2: Initialize the detector object
-        ObjectDetector.ObjectDetectorOptions options = ObjectDetector.ObjectDetectorOptions.builder()
-                .setMaxResults(5)
-                .setScoreThreshold(0.3f)
-                .build();
-        ObjectDetector detector = null;
-        try {
-            detector = ObjectDetector.createFromFileAndOptions(
-                    requireContext(),
-                    "salad.tflite",
-                    options
-            );
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Step 3: Feed given image to the detector
-        List<Detection> results = detector.detect(image);
-
-        // Step 4: Parse the detection result and show it
-        for (DetectedObject detectedObject : results) {
-            Rect boundingBox = detectedObject.getBoundingBox();
-            Integer trackingId = detectedObject.getTrackingId();
-            for (DetectedObject.Label label : detectedObject.getLabels()) {
-                String text = label.getText();
-                int index = label.getIndex();
-                float confidence = label.getConfidence();
-            }
-        }
-
-        // Draw the detection result on the bitmap and show it.
-        Bitmap imgWithResult = drawDetectionResult(bitmap, result);
-        binding.imageView.setImageBitmap(imgWithResult);
-    }
-
-    static class DetectionResult{
-            RectF boundingBox;
-            String text;
-
-        public DetectionResult(){}
-
-        public DetectionResult(RectF boundingBox, String text) {
-            this.boundingBox = boundingBox;
-            this.text = text;
-        }
-
-        public RectF getBoundingBox() {
-            return boundingBox;
-        }
-
-        public void setBoundingBox(RectF boundingBox) {
-            this.boundingBox = boundingBox;
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public void setText(String text) {
-            this.text = text;
-        }
-    }
-
-    private Bitmap drawDetectionResult(Bitmap bitmap, DetectionResult detectionResult){
-        Bitmap outputBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-        Canvas canvas = new Canvas(outputBitmap);
-        Paint pen = new Paint();
-        pen.setTextAlign(Paint.Align.LEFT);
-
-        // draw bounding box
-        pen.setColor(Color.RED);
-        pen.setStrokeWidth(8F);
-        pen.setStyle(Paint.Style.STROKE);
-        RectF box = detectionResult.boundingBox;
-        canvas.drawRect(box, pen);
-
-        Rect tagSize = new Rect(0, 0, 0, 0);
-
-        // calculate the right font size
-        pen.setStyle(Paint.Style.FILL_AND_STROKE);
-        pen.setColor(Color.YELLOW);
-        pen.setStrokeWidth(2F);
-
-        pen.setTextSize(96F);
-        pen.getTextBounds(detectionResult.text, 0, detectionResult.text.length(), tagSize);
-        float fontSize= pen.getTextSize()* box.width() / tagSize.width();
-
-        // adjust the font size so texts are inside the bounding box
-        if (fontSize < pen.getTextSize()) pen.setTextSize(fontSize);
-
-        float margin = (box.width() - tagSize.width()) / 2.0F;
-        if (margin < 0F) margin = 0F;
-        canvas.drawText(
-                detectionResult.text, box.left + margin,
-                box.top + tagSize.height(), pen
-        );
-
-        return outputBitmap;
-    }*/
-
-    /**
-    public void DetectObject(){
-        LocalModel localModel =
-                new LocalModel.Builder()
-                        .setAssetFilePath("model.tflite")
-                        // or .setAbsoluteFilePath(absolute file path to model file)
-                        // or .setUri(URI to model file)
-                        .build();
-
-        CustomObjectDetectorOptions customObjectDetectorOptions =
-                new CustomObjectDetectorOptions.Builder(localModel)
-                        .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
-                        .enableMultipleObjects()
-                        .enableClassification()
-                        .setClassificationConfidenceThreshold(0.5f)
-                        .setMaxPerObjectLabelCount(3)
-                        .build();
-
-        ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
-
-        InputImage image = InputImage.fromBitmap(recognitionImage, 0);
-
-        objectDetector
-                .process(image)
-                .addOnFailureListener(e -> {Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();})
-                .addOnSuccessListener(results -> {
-                    for (DetectedObject detectedObject : results) {
-                        Rect boundingBox = detectedObject.getBoundingBox();
-                        Integer trackingId = detectedObject.getTrackingId();
-                        for (DetectedObject.Label label : detectedObject.getLabels()) {
-                            String text = label.getText();
-                            int index = label.getIndex();
-                            float confidence = label.getConfidence();
-
-                        }
-
-                    }
-                });
-
-    }*/
-
-    public void DetectImage() {
+    public void detectImage(Bitmap bitmap) {
+        String outputText = "";
         // Upload tensorflow file
-        LocalModel localModel = new LocalModel.Builder()
-                .setAssetFilePath("model.tflite")
-                .build();
+        try {
+            CkptR50x1Mobilenetv2ExtraLabels1 model = CkptR50x1Mobilenetv2ExtraLabels1.newInstance(requireContext());
 
-        CustomImageLabelerOptions customImageLabelerOptions =
-                new CustomImageLabelerOptions.Builder(localModel)
-                        .setConfidenceThreshold(0.5f)
-                        .setMaxResultCount(5)
-                        .build();
-        ImageLabeler labeler = ImageLabeling.getClient(customImageLabelerOptions);
+            // Creates inputs for reference.
+            TensorImage image = TensorImage.fromBitmap(bitmap);
 
-        // Bitmap recognitionImage = ((BitmapDrawable)binding.imageView.getDrawable()).getBitmap();
-        InputImage image = InputImage.fromBitmap(recognitionImage, 0);
+            // Runs model inference and gets result.
+            CkptR50x1Mobilenetv2ExtraLabels1.Outputs outputs = model.process(image);
+            List<Category> results = outputs.getProbabilityAsCategoryList();
+            for (Category category: results) {
+                String label = category.getLabel();
+                float confidence = category.getScore();
+                int index = category.getIndex();
+                outputText += label + " : " + confidence + "\n";
+            }
+            // Log.d("TFLiteDemo", outputText);
+            binding.RecognitionResult.setText(outputText);
 
-        labeler.process(image)
-                .addOnSuccessListener(new OnSuccessListener<List<ImageLabel>>() {
-                    @Override
-                    public void onSuccess(List<ImageLabel> labels) {
-                        // Task completed successfully
-                        for (ImageLabel label : labels) {
-                            String text = label.getText();
-                            float confidence = label.getConfidence();
-                            int index = label.getIndex();
-                            outputText += index + ". " + text + " : " + confidence + "\n";
-                        }
-                        binding.RecognitionResult.setText(outputText);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // Task failed with an exception
-                        Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+            // Releases model resources if no longer used.
+            model.close();
+        } catch (IOException e) {
+            Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();
+        }
+
+//        CustomImageLabelerOptions customImageLabelerOptions =
+//                new CustomImageLabelerOptions.Builder(localModel)
+//                        .setConfidenceThreshold(0.5f)
+//                        .setMaxResultCount(5)
+//                        .build();
+//        ImageLabeler labeler = ImageLabeling.getClient(customImageLabelerOptions);
+
+//        InputImage image = InputImage.fromBitmap(recognitionImage, 0);
+//
+//        labeler.process(image)
+//                .addOnSuccessListener(new OnSuccessListener<List<ImageLabel>>() {
+//                    @Override
+//                    public void onSuccess(List<ImageLabel> labels) {
+//                        // Task completed successfully
+//                        for (ImageLabel label : labels) {
+//                            String text = label.getText();
+//                            float confidence = label.getConfidence();
+//                            int index = label.getIndex();
+//                            outputText += index + ". " + text + " : " + confidence + "\n";
+//                        }
+//                        binding.RecognitionResult.setText(outputText);
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        // Task failed with an exception
+//                        Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
     }
-
 
     @Override
     public void onPause() {
@@ -436,8 +295,7 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
                     photoFile = getRandomFileUri(true);
                     boolean isImageSet = setFoodImageToView(photoFile);
                     setDateOfPhoto();
-                    DetectImage();
-                    // runObjectDetection(recognitionImage);
+                    detectImage(recognitionImage);
 
                     if(!isImageSet){
                         Toast.makeText(getActivity(), "There was an error capturing the image" , Toast.LENGTH_SHORT).show();
