@@ -1,7 +1,5 @@
 package com.example.foodintaketracking.dbProvider;
 
-import static java.util.Objects.*;
-
 import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;

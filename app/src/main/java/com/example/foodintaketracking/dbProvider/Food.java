@@ -1,11 +1,14 @@
 package com.example.foodintaketracking.dbProvider;
 
+import android.graphics.Bitmap;
+
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
+import java.io.File;
 import java.util.Date;
 
 
@@ -40,10 +43,13 @@ public class Food {
     @ColumnInfo(name = "foodQtyMetric")
     private String foodQtyMetric;
 
+    @ColumnInfo(name = "foodEatenTime")
+    private String foodEatenTime;
+
     @ColumnInfo(name = "foodDuration")
     private int foodDuration;
 
-    public Food(String foodName, String foodImgFilePath, Date foodEatenAt, Double foodEatenPercent, String foodDesc, String foodCategory, int foodQty, String foodQtyMetric, int foodDuration) {
+    public Food(String foodName, String foodImgFilePath, Date foodEatenAt, Double foodEatenPercent, String foodDesc, String foodCategory, int foodQty, String foodQtyMetric, String foodEatenTime, int foodDuration) {
         this.foodName = foodName;
         this.foodImgFilePath = foodImgFilePath;
         this.foodEatenAt = foodEatenAt;
@@ -52,9 +58,9 @@ public class Food {
         this.foodCategory = foodCategory;
         this.foodQty = foodQty;
         this.foodQtyMetric = foodQtyMetric;
+        this.foodEatenTime = foodEatenTime;
         this.foodDuration = foodDuration;
     }
-
 
     public int getId() {
         return id;
@@ -126,6 +132,14 @@ public class Food {
 
     public void setFoodQtyMetric(String foodQtyMetric) {
         this.foodQtyMetric = foodQtyMetric;
+    }
+
+    public String getFoodEatenTime() {
+        return foodEatenTime;
+    }
+
+    public void setFoodEatenTime(String foodEatenTime) {
+        this.foodEatenTime = foodEatenTime;
     }
 
     public int getFoodDuration() {

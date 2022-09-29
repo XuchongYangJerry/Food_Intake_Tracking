@@ -27,6 +27,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -58,11 +60,14 @@ import org.tensorflow.lite.support.label.Category;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelectedListener{
     private FragmentAddFoodBinding binding;
@@ -78,23 +83,14 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
     //    String[] mealList = {"Breakfast", "Lunch", "Snack", "Dinner"};
     //    String[] foodCategoryList = {"Grains", "Fruits", "Vegetables", "Fish & Meats", "Dairy", "Sugars & Oils", "Others"};
     int imageSize = 224;
-    Interpreter tflite;
 
+    Double selectRadioButton = 0.0;
     Bitmap recognitionImage;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentAddFoodBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
-
-
-        binding.clearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                binding.RecognitionResult.setText("");
-                Toast.makeText(getActivity(), "Recognition result cleared.", Toast.LENGTH_LONG).show();
-            }
-        });
 
 
         if (getActivity().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -108,6 +104,8 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
         setDateOfMeal();
         handleMealTimer();
         setUpCameraService();
+        saveEatenPercentage();
+
         // setupSpinners();
         mFoodViewModel = new ViewModelProvider(this).get(FoodViewModel.class);
         mFoodViewModel.getAllFood().observe(getActivity(), newData -> {
@@ -128,6 +126,12 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
                             }
                         })
                         .show();
+                binding.foodItemTextView.setText("");
+                binding.radio100.setChecked(true);
+                binding.imageView.setImageDrawable(null);
+                mealConsumptionMilliseconds = 0L;
+                binding.photoTimestampTextView.setText("00:00:00");
+                binding.mealDurTextView.setText("00:00:00");
             }
         });
 
@@ -146,14 +150,16 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             // Runs model inference and gets result.
             CkptR50x1Mobilenetv2ExtraLabels1.Outputs outputs = model.process(image);
             List<Category> results = outputs.getProbabilityAsCategoryList();
-            for (Category category: results) {
-                String label = category.getLabel();
-                float confidence = category.getScore();
-                int index = category.getIndex();
-                outputText += label + " : " + confidence + "\n";
-            }
-            // Log.d("TFLiteDemo", outputText);
-            binding.RecognitionResult.setText(outputText);
+            Category maxCategory = results.stream().max(Comparator.comparing(Category::getScore)).get();
+//            for (Category category: results) {
+//                String label = category.getLabel();
+//                float confidence = category.getScore();
+//                int index = category.getIndex();
+//                outputText += label + ":" + confidence + "\n";
+//            }
+            DecimalFormat confidence = new DecimalFormat("00.00%");
+            outputText += maxCategory.getLabel() + " : " + confidence.format(maxCategory.getScore());
+            binding.foodItemTextView.setText(outputText);
 
             // Releases model resources if no longer used.
             model.close();
@@ -161,36 +167,28 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();
         }
 
-//        CustomImageLabelerOptions customImageLabelerOptions =
-//                new CustomImageLabelerOptions.Builder(localModel)
-//                        .setConfidenceThreshold(0.5f)
-//                        .setMaxResultCount(5)
-//                        .build();
-//        ImageLabeler labeler = ImageLabeling.getClient(customImageLabelerOptions);
+    }
 
-//        InputImage image = InputImage.fromBitmap(recognitionImage, 0);
-//
-//        labeler.process(image)
-//                .addOnSuccessListener(new OnSuccessListener<List<ImageLabel>>() {
-//                    @Override
-//                    public void onSuccess(List<ImageLabel> labels) {
-//                        // Task completed successfully
-//                        for (ImageLabel label : labels) {
-//                            String text = label.getText();
-//                            float confidence = label.getConfidence();
-//                            int index = label.getIndex();
-//                            outputText += index + ". " + text + " : " + confidence + "\n";
-//                        }
-//                        binding.RecognitionResult.setText(outputText);
-//                    }
-//                })
-//                .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        // Task failed with an exception
-//                        Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
+    public void saveEatenPercentage(){
+        binding.radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int radioId) {
+                switch (radioId){
+                    case R.id.radio025:
+                        selectRadioButton = 0.25;
+                        break;
+                    case R.id.radio050:
+                        selectRadioButton = 0.50;
+                        break;
+                    case R.id.radio075:
+                        selectRadioButton = 0.75;
+                        break;
+                    default:
+                        selectRadioButton = 1.00;
+                        break;
+                }
+            }
+        });
     }
 
     @Override
@@ -229,16 +227,13 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
 //        else{
 //            binding.imageView.setImageResource(R.drawable.ic_launcher_foreground);
 //        }
-        photoFile = getRandomFileUri(true);
         //setFoodImageToView(photoFile);
     }
 
-
     private void setUpCameraService(){
-
         binding.foodCaptureButton.setOnClickListener(v -> {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            photoFile = getRandomFileUri(true);
+            photoFile = getFileUri(false);
             Uri fileProvider = FileProvider.getUriForFile(getContext(), getActivity().getPackageName(), photoFile);
             intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
             if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
@@ -252,17 +247,18 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
     }
 
     private void saveFoodToRoom(){
-        Food item = new Food("Unknown",
+        Food item = new Food(
+                binding.foodItemTextView.getText().toString().trim(),
                 photoFile.getAbsolutePath(),
                 Calendar.getInstance().getTime(),
-                0.0,
-                binding.foodItemTextView.getText().toString(),
-                "Dinner",
+                selectRadioButton,
+                binding.foodItemTextView.getText().toString().trim(),
+                "Fruit",
                 1,
                 "testMetric",
+                binding.photoTimestampTextView.getText().toString(),
                 (int)mealConsumptionMilliseconds);
         mFoodViewModel.insert(item);
-
         //getActivity().getApplicationContext().deleteFile(photoFile.getAbsolutePath());
 
     }
@@ -292,7 +288,6 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
                     startMilliSecs = sharedPreferences.getLong("startMilliSecs", 0L);
                     mealConsumptionMilliseconds = sharedPreferences.getLong("mealConsumptionMilliseconds", 0L);
                     isMealTimerRunning = sharedPreferences.getBoolean("isMealTimerRunning", false);
-                    photoFile = getRandomFileUri(true);
                     boolean isImageSet = setFoodImageToView(photoFile);
                     setDateOfPhoto();
                     detectImage(recognitionImage);
@@ -337,12 +332,12 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             e.printStackTrace();
         }
         if(rotatedBitmap != null){
-            Bitmap imageRounded=Bitmap.createBitmap(rotatedBitmap.getWidth(), rotatedBitmap.getHeight(), rotatedBitmap.getConfig());
-            Canvas canvas=new Canvas(imageRounded);
-            Paint mpaint=new Paint();
-            mpaint.setAntiAlias(true);
-            mpaint.setShader(new BitmapShader(rotatedBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
-            canvas.drawRoundRect((new RectF(0, 0, rotatedBitmap.getWidth(), rotatedBitmap.getHeight())), 100, 100, mpaint); // Round Image Corner 100 100 100 100
+            Bitmap imageRounded = Bitmap.createBitmap(rotatedBitmap.getWidth(), rotatedBitmap.getHeight(), rotatedBitmap.getConfig());
+            Canvas canvas = new Canvas(imageRounded);
+            Paint paint = new Paint();
+            paint.setAntiAlias(true);
+            paint.setShader(new BitmapShader(rotatedBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+            canvas.drawRoundRect((new RectF(0, 0, rotatedBitmap.getWidth(), rotatedBitmap.getHeight())), 100, 100, paint); // Round Image Corner 100 100 100 100
 
             binding.imageView.setImageBitmap(imageRounded);
 
@@ -356,20 +351,22 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
         return false;
     }
 
-    public File getRandomFileUri(boolean isTemporary) {
+    public File getFileUri(boolean isTemporary) {
         String photoTimestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         if(isTemporary){
             photoTimestamp = "temporary";
         }
-        String TAG = "FoodDetection";
+        String TAG = "FoodIntakeTracking";
         File mediaStorageDir = new File(getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
-        //File mediaStorageDir = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), TAG);
-
-        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
-            Log.d(TAG, "failed to create directory");
+        // File mediaStorageDir = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), TAG);
+        if (!mediaStorageDir.exists()){
+            mediaStorageDir.mkdir();
+            // Log.d(TAG, "failed to create directory");
         }
 
-        return new File(mediaStorageDir.getPath() + File.separator + "IMG_" + photoTimestamp + ".jpeg");
+        File file = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + photoTimestamp + ".jpeg");
+
+        return file;
     }
 
     private void setDateOfMeal() {
@@ -377,9 +374,10 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
         DateFormat formatter = new SimpleDateFormat("EEE dd-MM-yyyy", Locale.ENGLISH);
         binding.dateTextView.setText(formatter.format(date));
     }
+
     private void setDateOfPhoto() {
         Date date = Calendar.getInstance().getTime();
-        DateFormat formatter = new SimpleDateFormat("HH:MM:SS", Locale.ENGLISH);
+        DateFormat formatter = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         binding.photoTimestampTextView.setText(formatter.format(date));
     }
 
@@ -392,7 +390,8 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
                 binding.playPauseMealButton.setBackgroundResource(R.drawable.button_background_red);
                 startMilliSecs = System.currentTimeMillis();
                 handler.postDelayed(runnable, 0);
-            } else {
+            }
+            else {
                 binding.playPauseMealButton.setImageResource(android.R.drawable.ic_media_play);
                 binding.playPauseMealButton.setBackgroundResource(R.drawable.button_background_blue);
                 mealConsumptionMilliseconds += System.currentTimeMillis() - startMilliSecs;
