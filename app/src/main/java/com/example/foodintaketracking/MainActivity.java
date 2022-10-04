@@ -102,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-        // replaceFragment(new AddFoodFragment());
 
         setSupportActionBar(binding.appBar.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

@@ -27,7 +27,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
@@ -42,32 +41,43 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.foodintaketracking.databinding.FragmentAddFoodBinding;
 import com.example.foodintaketracking.dbProvider.Food;
 import com.example.foodintaketracking.dbProvider.FoodViewModel;
+
+import com.example.foodintaketracking.retrofit.RetrofitClient;
+import com.example.foodintaketracking.retrofit.RetrofitInterface;
+import com.example.foodintaketracking.retrofit.FoodNutrition;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
+import com.example.foodintaketracking.ml.CkptR50x1Mobilenetv2ExtraLabels1;
+import com.example.foodintaketracking.ml.Mobilenetv2ExtraLabels1;
+import com.example.foodintaketracking.ml.CkptR50x1ExtraLabels1;
 import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.label.ImageLabel;
 import com.google.mlkit.vision.label.ImageLabeler;
 import com.google.mlkit.vision.label.ImageLabeling;
 import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions;
-import com.example.foodintaketracking.ml.CkptR50x1Mobilenetv2ExtraLabels1;
 
-import org.tensorflow.lite.Interpreter;
+
+import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.support.label.Category;
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelectedListener{
     private FragmentAddFoodBinding binding;
@@ -138,28 +148,85 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
         return view;
     }
 
+    public void recogniseFood(Bitmap bitmap){
+
+        LocalModel localModel = new LocalModel.Builder()
+                        .setAssetFilePath("lite-model_aiy_vision_classifier_food_V1_1.tflite")
+                        .build();
+
+        CustomImageLabelerOptions customImageLabelerOptions =
+                new CustomImageLabelerOptions.Builder(localModel)
+                        .setConfidenceThreshold(0.6f)
+                        .setMaxResultCount(3)
+                        .build();
+
+        ImageLabeler labeler = ImageLabeling.getClient(customImageLabelerOptions);
+
+        InputImage image = InputImage.fromBitmap(bitmap, 0);
+
+        labeler.process(image)
+                .addOnSuccessListener(new OnSuccessListener<List<ImageLabel>>() {
+                    @Override
+                    public void onSuccess(List<ImageLabel> labels) {
+                        String outputText = "";
+                        for (ImageLabel label : labels) {
+                            String text = label.getText();
+                            float confidence = label.getConfidence();
+                            // int index = label.getIndex();
+                            outputText += text + confidence + "\n";
+                        }
+                        binding.foodItemTextView.setText(outputText);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     public void detectImage(Bitmap bitmap) {
         String outputText = "";
         // Upload tensorflow file
         try {
+            long time1 = System.currentTimeMillis();
+            //Log.e("Start Time", String.valueOf(time1));
+
             CkptR50x1Mobilenetv2ExtraLabels1 model = CkptR50x1Mobilenetv2ExtraLabels1.newInstance(requireContext());
+            long time2 = System.currentTimeMillis();
+            //Log.e("Time for create new instance of model", String.valueOf(time2));
 
             // Creates inputs for reference.
             TensorImage image = TensorImage.fromBitmap(bitmap);
+
+            long time3 = System.currentTimeMillis();
+            //Log.e("Time for input image", String.valueOf(time3));
 
             // Runs model inference and gets result.
             CkptR50x1Mobilenetv2ExtraLabels1.Outputs outputs = model.process(image);
             List<Category> results = outputs.getProbabilityAsCategoryList();
             Category maxCategory = results.stream().max(Comparator.comparing(Category::getScore)).get();
+
+            long time4 = System.currentTimeMillis();
+            //Log.e("Time for get detect result", String.valueOf(time4));
+
 //            for (Category category: results) {
 //                String label = category.getLabel();
 //                float confidence = category.getScore();
 //                int index = category.getIndex();
 //                outputText += label + ":" + confidence + "\n";
 //            }
+            /**
             DecimalFormat confidence = new DecimalFormat("00.00%");
             outputText += maxCategory.getLabel() + " : " + confidence.format(maxCategory.getScore());
+            binding.foodItemTextView.setText(outputText);*/
+
+            outputText += maxCategory.getLabel();
             binding.foodItemTextView.setText(outputText);
+
+            long time5 = System.currentTimeMillis();
+            //Log.e("Time for set to the view", String.valueOf(time5));
 
             // Releases model resources if no longer used.
             model.close();
@@ -167,6 +234,71 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    public void detectImage2(Bitmap bitmap) {
+        String outputText = "";
+        try {
+            Mobilenetv2ExtraLabels1 model = Mobilenetv2ExtraLabels1.newInstance(requireContext());
+
+            TensorImage tensorImage = new TensorImage(DataType.FLOAT32);
+            tensorImage.load(bitmap);
+            ByteBuffer byteBuffer = tensorImage.getBuffer();
+            // Creates inputs for reference.
+            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32);
+            inputFeature0.loadBuffer(byteBuffer);
+
+            // Runs model inference and gets result.
+            Mobilenetv2ExtraLabels1.Outputs outputs = model.process(inputFeature0);
+            TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
+
+            float[] data = outputFeature0.getFloatArray();
+            outputText += String.valueOf(data[0]) ;
+            binding.foodItemTextView.setText(outputText);
+
+            // Releases model resources if no longer used.
+            model.close();
+        } catch (IOException e) {
+            // TODO Handle the exception
+        }
+    }
+
+    public void detectImage3(Bitmap bitmap) {
+        String outputText = "";
+        try {
+            CkptR50x1ExtraLabels1 model = CkptR50x1ExtraLabels1.newInstance(requireContext());
+
+            // Creates inputs for reference.
+            TensorImage tensorImage = new TensorImage(DataType.FLOAT32);
+            tensorImage.load(bitmap);
+            ByteBuffer byteBuffer = tensorImage.getBuffer();
+            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32);
+            inputFeature0.loadBuffer(byteBuffer);
+
+            // Runs model inference and gets result.
+            CkptR50x1ExtraLabels1.Outputs outputs = model.process(inputFeature0);
+            TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
+
+            float[] confidences = outputFeature0.getFloatArray();
+            // find the index of the class with the biggest confidence.
+            int maxPos = 0;
+            float maxConfidence = 0;
+            for (int i = 0; i < confidences.length; i++) {
+                Log.i("model", String.valueOf(confidences[i]));
+                if (confidences[i] > maxConfidence) {
+                    maxConfidence = confidences[i];
+                    maxPos = i;
+                }
+            }
+
+            outputText += maxConfidence ;
+            binding.foodItemTextView.setText(outputText);
+
+            // Releases model resources if no longer used.
+            model.close();
+        } catch (IOException e) {
+            // TODO Handle the exception
+        }
     }
 
     public void saveEatenPercentage(){
@@ -291,6 +423,8 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
                     boolean isImageSet = setFoodImageToView(photoFile);
                     setDateOfPhoto();
                     detectImage(recognitionImage);
+                    getNutrition();
+                    //recogniseFood(recognitionImage);
 
                     if(!isImageSet){
                         Toast.makeText(getActivity(), "There was an error capturing the image" , Toast.LENGTH_SHORT).show();
@@ -342,7 +476,7 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             binding.imageView.setImageBitmap(imageRounded);
 
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            recognitionImage = BitmapFactory.decodeFile(file.getAbsolutePath(),bmOptions);
+            recognitionImage = BitmapFactory.decodeFile(file.getAbsolutePath(), bmOptions);
             recognitionImage = Bitmap.createScaledBitmap(recognitionImage, imageSize, imageSize,false);
             Log.i(TAG, "Classification Start: " +  Calendar.getInstance().getTime());
             // classifyImage(anotherMap);
@@ -431,6 +565,46 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
 
     }
 
+    public void getNutrition(){
+
+        final String app_id = "d4cfc906";
+        final String app_key = "PRjUq4PSt1bURFU3E/pySA==uRj36c353wACrVqE";
+
+        RetrofitInterface retrofitInterface = RetrofitClient.getRetrofitService();
+        String foodName =  "A " + binding.foodItemTextView.getText().toString();
+
+        Call<FoodNutrition> callAsync = retrofitInterface.foodSearch(app_key, foodName);
+
+        //makes an async request & invokes callback methods when the response returns
+        callAsync.enqueue(new Callback<FoodNutrition>() {
+            @Override
+            public void onResponse(Call<FoodNutrition> call, Response<FoodNutrition> response) {
+                if (response.isSuccessful()) {
+                    FoodNutrition foodNutrition = response.body();
+                    Log.e("Success","Response success:" + response.code());
+                    String result = "";
+                    result += "Food Name: " + foodNutrition.getName() + "\n"
+                                + "Calories: "+ foodNutrition.getCalories() + "J                "
+                                + "Sugar: " + foodNutrition.getSugar() + "g\n"
+                                + "Fat: " + foodNutrition.getFat() + "g                         "
+                                + "Protein: " + foodNutrition.getProtein() + "g\n"
+                                + "Cholesterol: " + foodNutrition.getCholesterol() + "mg            "
+                                + "Carbohydrate; " + foodNutrition.getCarbohydrate() + "g";
+
+                    binding.nutrition.setText(result);
+                }
+                else {
+                    Log.e("Error ","Response failed:" + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<FoodNutrition> call, Throwable t){
+                Log.e("Error ","No Response: " + t.getMessage());
+            }
+        });
+    }
+
 
     /**
      public void classifyImage(Bitmap image){
@@ -510,12 +684,12 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
      // TODO Handle the exception
      }
 
-     }
+     }*/
 
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
-    }*/
+    }
 }
