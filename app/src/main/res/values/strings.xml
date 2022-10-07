@@ -15,4 +15,11 @@
     <string name="food_history">Food History</string>
     <string name="recommend">Recommend</string>
     <string name="glucose_report">Glucose Report</string>
+
+    <string name="Green">Chris said: “Good morning activity and low carbohydrate breakfast kept things nicely controlled thorough the morning.Low activity after lunch and multiple carbohydrate snacks in early afternoon kept blood sugar high in the afternoon. Try some low-GI snacks e.g. cheese on Vita Wheats or fruit (banana, berries etc.).”
+    </string>
+    <string name="Orange">Choose carefully and avoid large serves\n\nAmber food and drinks should be selected carefully and eaten in moderation. Although items in the amber category provide some important nutrients, they can also cause you to eat too much energy (kilojoules) and be higher in saturated fats, sugar and salt.
+    </string>
+    <string name="Red">Chris said: “Main issue is the high sugars after lunch and dinner, White flour-based bread and pizza base are causing problems, consider multigrain bread and a healthier choice for dinner. Good steps but no recorded activity. Try for 20 minutes extra exercise of moderate level per day.”
+    </string>
 </resources>

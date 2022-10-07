@@ -1,11 +1,7 @@
 package com.example.foodintaketracking.retrofit;
 
 
-import java.util.ArrayList;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 public class FoodNutrition {
@@ -24,11 +20,11 @@ public class FoodNutrition {
         return items.get(0).getName();
     }
 
-    public double getFat() {
+    public float getFat() {
         return items.get(0).getFat_total();
     }
 
-    public double getSugar() {
+    public float getSugar() {
         return items.get(0).getSugar();
     }
 
@@ -51,15 +47,15 @@ public class FoodNutrition {
 
 class Item {
 
-    public double sugar_g;
+    public float sugar_g;
     public String name;
-    public double fat_total_g;
+    public float fat_total_g;
     public double calories;
     public int cholesterol_mg;
     public double protein_g;
     public double carbohydrates_total_g;
 
-    public double getSugar() {
+    public float getSugar() {
         return sugar_g;
     }
 
@@ -67,7 +63,7 @@ class Item {
         return name;
     }
 
-    public double getFat_total() {
+    public float getFat_total() {
         return fat_total_g;
     }
 

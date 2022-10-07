@@ -91,24 +91,24 @@ public class GlucoseReportFragment extends Fragment {
     private void setData() {
         ArrayList<Entry> values = new ArrayList<>();
 
-        values.add(new Entry(0, (float)6.4));
-        values.add(new Entry(1, (float)6.4));
-        values.add(new Entry(2, (float)6.1));
-        values.add(new Entry(3, (float)6.6));
-        values.add(new Entry(4, (float)6.8));
-        values.add(new Entry(5, (float)6.8));
-        values.add(new Entry(6, (float)6.8));
-        values.add(new Entry(7, (float)6.9));
-        values.add(new Entry(8, (float)7.2));
-        values.add(new Entry(9, (float)7.4));
-        values.add(new Entry(10, (float)7.3));
-        values.add(new Entry(11, (float)7.2));
-        values.add(new Entry(12, (float)7.1));
-        values.add(new Entry(13, (float)6.8));
-        values.add(new Entry(14, (float)6.9));
-        values.add(new Entry(15, (float)7.4));
-        values.add(new Entry(16, (float)7.4));
-        values.add(new Entry(17, (float)7.3));
+        values.add(new Entry(0, 6.4f));
+        values.add(new Entry(1, 6.4f));
+        values.add(new Entry(2, 6.1f));
+        values.add(new Entry(3, 6.6f));
+        values.add(new Entry(4, 6.8f));
+        values.add(new Entry(5, 6.8f));
+        values.add(new Entry(6, 6.8f));
+        values.add(new Entry(7, 6.9f));
+        values.add(new Entry(8, 7.2f));
+        values.add(new Entry(9, 7.4f));
+        values.add(new Entry(10, 7.3f));
+        values.add(new Entry(11, 7.2f));
+        values.add(new Entry(12, 7.1f));
+        values.add(new Entry(13, 6.8f));
+        values.add(new Entry(14, 6.9f));
+        values.add(new Entry(15, 7.4f));
+        values.add(new Entry(16, 7.4f));
+        values.add(new Entry(17, 7.3f));
 
         LineDataSet set1;
         if (binding.chart.getData() != null &&
@@ -118,7 +118,7 @@ public class GlucoseReportFragment extends Fragment {
             binding.chart.getData().notifyDataChanged();
             binding.chart.notifyDataSetChanged();
         } else {
-            set1 = new LineDataSet(values, "Time(15 min)");
+            set1 = new LineDataSet(values, "Time (15 min)");
             set1.setDrawIcons(false);
             set1.enableDashedLine(10f, 5f, 0f);
             set1.enableDashedHighlightLine(10f, 5f, 0f);
@@ -126,7 +126,8 @@ public class GlucoseReportFragment extends Fragment {
             set1.setCircleColor(Color.CYAN);
             set1.setLineWidth(2f);
             set1.setCircleRadius(5f);
-            set1.setDrawCircleHole(false);
+            set1.setDrawCircleHole(true);
+            set1.setDrawValues(false);
             set1.setValueTextSize(12f);
             set1.setDrawFilled(true);
             set1.setFormLineWidth(1f);

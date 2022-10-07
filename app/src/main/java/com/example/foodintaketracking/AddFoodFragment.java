@@ -68,7 +68,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -96,12 +98,16 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
 
     Double selectRadioButton = 0.0;
     Bitmap recognitionImage;
+    String food_name ="";
+    float sugar = 0;
+    float fat = 0;
+    String nutrition = "";
+
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentAddFoodBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
-
 
         if (getActivity().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.CAMERA}, 100);
@@ -124,6 +130,7 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             });
         });
 
+
         binding.saveMealButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -136,12 +143,24 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
                             }
                         })
                         .show();
+
+                String message = nutrition;
+                if (!message.isEmpty() ) {
+                    SharedPreferences sharedPref = requireActivity().getSharedPreferences("Nutrition", requireContext().MODE_PRIVATE);
+                    SharedPreferences.Editor spEditor = sharedPref.edit();
+                    spEditor.putString("nutrition", message);
+                    spEditor.putString("foodName", food_name);
+                    spEditor.putFloat("sugar", sugar);
+                    spEditor.putFloat("fat", fat);
+                    spEditor.apply();
+                }
                 binding.foodItemTextView.setText("");
                 binding.radio100.setChecked(true);
                 binding.imageView.setImageDrawable(null);
                 mealConsumptionMilliseconds = 0L;
                 binding.photoTimestampTextView.setText("00:00:00");
                 binding.mealDurTextView.setText("00:00:00");
+                binding.nutrition.setText("");
             }
         });
 
@@ -191,17 +210,17 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
         // Upload tensorflow file
         try {
             long time1 = System.currentTimeMillis();
-            //Log.e("Start Time", String.valueOf(time1));
+            Log.e("Start Time", time1 + "ms");
 
             CkptR50x1Mobilenetv2ExtraLabels1 model = CkptR50x1Mobilenetv2ExtraLabels1.newInstance(requireContext());
             long time2 = System.currentTimeMillis();
-            //Log.e("Time for create new instance of model", String.valueOf(time2));
+            Log.e("Time for create new instance of model", time2 + "ms");
 
             // Creates inputs for reference.
             TensorImage image = TensorImage.fromBitmap(bitmap);
 
             long time3 = System.currentTimeMillis();
-            //Log.e("Time for input image", String.valueOf(time3));
+            Log.e("Time for input image", time3 + "ms");
 
             // Runs model inference and gets result.
             CkptR50x1Mobilenetv2ExtraLabels1.Outputs outputs = model.process(image);
@@ -209,7 +228,7 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             Category maxCategory = results.stream().max(Comparator.comparing(Category::getScore)).get();
 
             long time4 = System.currentTimeMillis();
-            //Log.e("Time for get detect result", String.valueOf(time4));
+            Log.e("Time for get detect result", time4 + "ms");
 
 //            for (Category category: results) {
 //                String label = category.getLabel();
@@ -226,9 +245,8 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             binding.foodItemTextView.setText(outputText);
 
             long time5 = System.currentTimeMillis();
-            //Log.e("Time for set to the view", String.valueOf(time5));
+            Log.e("Time for set to the view", time5 + "ms");
 
-            // Releases model resources if no longer used.
             model.close();
         } catch (IOException e) {
             Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();
@@ -252,8 +270,24 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             Mobilenetv2ExtraLabels1.Outputs outputs = model.process(inputFeature0);
             TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
 
-            float[] data = outputFeature0.getFloatArray();
-            outputText += String.valueOf(data[0]) ;
+            float[] confidences = outputFeature0.getFloatArray();
+            // find the index of the class with the biggest confidence.
+            int maxPos = 0;
+            float maxConfidence = 0;
+            for (int i = 0; i < confidences.length; i++) {
+                Log.i("model", String.valueOf(confidences[i]));
+                if (confidences[i] > maxConfidence) {
+                    maxConfidence = confidences[i];
+                    maxPos = i;
+                }
+            }
+            String[] labelList = new String[]{"Apple", "Banana", "Orange", "Grape", "Mandarine", "Strawberry", "Blueberry", "Rasberry", "Cherry", "Kiwi", "Pineapple", "Persimmon", "Watermelon",
+                    "Rockmelon", "Pear", "Peach", "Apricot", "Nectarines", "Plum", "Grapefruit", "Pomegranate", "Avacado", "Cumcumber", "Tomato", "Carrot", "Common Fig",
+                    "Dragonfruit", "Papaw", "Passionfruit", "Papaya", "Coffee", "Tea", "orange juice", "smoothie", "milk", "milkshake", "hot chocolate", "energy drink",
+                    "Soft drink", "Juice", "Beer", "Wine", "Liquor", "ice cream", "biscuits", "muffin", "danish", "croissant", "scone"};
+
+            DecimalFormat confidence = new DecimalFormat("00.00%");
+            outputText += labelList[maxPos] + ": " + confidence.format(maxConfidence);
             binding.foodItemTextView.setText(outputText);
 
             // Releases model resources if no longer used.
@@ -290,8 +324,13 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
                     maxPos = i;
                 }
             }
+            String[] labelList = new String[]{"Apple", "Banana", "Orange", "Grape", "Mandarine", "Strawberry", "Blueberry", "Rasberry", "Cherry", "Kiwi", "Pineapple", "Persimmon", "Watermelon",
+                    "Rockmelon", "Pear", "Peach", "Apricot", "Nectarines", "Plum", "Grapefruit", "Pomegranate", "Avacado", "Cumcumber", "Tomato", "Carrot", "Common Fig",
+                    "Dragonfruit", "Papaw", "Passionfruit", "Papaya", "Coffee", "Tea", "orange juice", "smoothie", "milk", "milkshake", "hot chocolate", "energy drink",
+                    "Soft drink", "Juice", "Beer", "Wine", "Liquor", "ice cream", "biscuits", "muffin", "danish", "croissant", "scone"};
 
-            outputText += maxConfidence ;
+            DecimalFormat confidence = new DecimalFormat("00.00%");
+            outputText += labelList[maxPos] + ": " + confidence.format(maxConfidence);
             binding.foodItemTextView.setText(outputText);
 
             // Releases model resources if no longer used.
@@ -379,12 +418,20 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
     }
 
     private void saveFoodToRoom(){
+        String foodItem = binding.foodItemTextView.getText().toString();
+        String foodName;
+        if(foodItem.contains(":")) {
+            foodName = foodItem.substring(0, foodItem.indexOf(":"));
+        }
+        else{
+            foodName = foodItem;
+        }
         Food item = new Food(
-                binding.foodItemTextView.getText().toString().trim(),
+                foodName,
                 photoFile.getAbsolutePath(),
                 Calendar.getInstance().getTime(),
                 selectRadioButton,
-                binding.foodItemTextView.getText().toString().trim(),
+                foodName,
                 "Fruit",
                 1,
                 "testMetric",
@@ -424,6 +471,12 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
                     setDateOfPhoto();
                     detectImage(recognitionImage);
                     getNutrition();
+
+//                    SharedViewModel model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+//                    if (!nutrition.isEmpty()) {
+//                        model.setMessage(nutrition);
+//                    }
+
                     //recogniseFood(recognitionImage);
 
                     if(!isImageSet){
@@ -567,11 +620,18 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
 
     public void getNutrition(){
 
-        final String app_id = "d4cfc906";
+        // final String app_id = "d4cfc906";
         final String app_key = "PRjUq4PSt1bURFU3E/pySA==uRj36c353wACrVqE";
 
         RetrofitInterface retrofitInterface = RetrofitClient.getRetrofitService();
-        String foodName =  "A " + binding.foodItemTextView.getText().toString();
+        String foodItem = binding.foodItemTextView.getText().toString();
+        String foodName;
+        if(foodItem.contains(":")) {
+            foodName = "A " + foodItem.substring(0, foodItem.indexOf(":"));
+        }
+        else{
+            foodName = foodItem;
+        }
 
         Call<FoodNutrition> callAsync = retrofitInterface.foodSearch(app_key, foodName);
 
@@ -581,17 +641,25 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             public void onResponse(Call<FoodNutrition> call, Response<FoodNutrition> response) {
                 if (response.isSuccessful()) {
                     FoodNutrition foodNutrition = response.body();
-                    Log.e("Success","Response success:" + response.code());
-                    String result = "";
-                    result += "Food Name: " + foodNutrition.getName() + "\n"
-                                + "Calories: "+ foodNutrition.getCalories() + "J                "
+                    Log.w("Success","Response success:" + response.code());
+                    if (foodNutrition.getItems().size() != 0) {
+                        String result = "";
+                        result += "Calories: " + foodNutrition.getCalories() + "J                "
                                 + "Sugar: " + foodNutrition.getSugar() + "g\n"
                                 + "Fat: " + foodNutrition.getFat() + "g                         "
                                 + "Protein: " + foodNutrition.getProtein() + "g\n"
                                 + "Cholesterol: " + foodNutrition.getCholesterol() + "mg            "
-                                + "Carbohydrate; " + foodNutrition.getCarbohydrate() + "g";
+                                + "Carbohydrate: " + foodNutrition.getCarbohydrate() + "g";
 
-                    binding.nutrition.setText(result);
+                        binding.nutrition.setText(result);
+                        food_name = foodNutrition.getName();
+                        sugar = foodNutrition.getSugar();
+                        fat = foodNutrition.getFat();
+                        nutrition = result;
+                    }
+                    else{
+                        binding.nutrition.setText("Can not find nutrition information");
+                    }
                 }
                 else {
                     Log.e("Error ","Response failed:" + response.code());

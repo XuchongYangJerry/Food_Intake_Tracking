@@ -12,12 +12,15 @@
     <color name="red">#FFFF0000</color>
     <color name="deep_red">#E30425</color>
     <color name="light_red">#EB3349</color>
+    <color name="so_red">#FF0000</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="blue">#FF0000FF</color>
     <color name="pink">#FCDCDE</color>
+    <color name="orange">#FFCC00</color>
     <color name="light_yellow">#F1C850</color>
     <color name="light_green">#0DF385</color>
+    <color name="so_green">#92D050</color>
     <color name="colorPrimary">#00A7FF</color>
     <color name="colorPrimary2">#3C9FE3</color>
     <color name="colorPrimaryDark">#00C9FF</color>

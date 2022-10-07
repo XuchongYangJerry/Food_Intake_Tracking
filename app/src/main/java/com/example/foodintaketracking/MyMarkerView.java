@@ -21,8 +21,7 @@ public class MyMarkerView extends MarkerView {
         tvContent = (TextView) findViewById(R.id.tvContent);
     }
 
-    // callbacks everytime the MarkerView is redrawn, can be used to update the
-    // content (user-interface)
+    // callbacks everytime the MarkerView is redrawn, can be used to update the content (user-interface)
     @Override
     public void refreshContent(Entry e, Highlight highlight) {
 
@@ -30,7 +29,7 @@ public class MyMarkerView extends MarkerView {
 
             CandleEntry ce = (CandleEntry) e;
 
-            tvContent.setText("" + Utils.formatNumber(ce.getHigh(), 0, true));
+            tvContent.setText("" + Utils.formatNumber(ce.getClose(), 0, true));
         } else {
 
             tvContent.setText("" + Utils.formatNumber(e.getY(), 0, true));
