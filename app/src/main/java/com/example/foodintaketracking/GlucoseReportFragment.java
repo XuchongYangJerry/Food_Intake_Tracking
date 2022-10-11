@@ -56,7 +56,7 @@ public class GlucoseReportFragment extends Fragment {
         XAxis xAxis = binding.chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.enableGridDashedLine(2f, 2f, 0f);
-        xAxis.setAxisMaximum(17f);
+        xAxis.setAxisMaximum(20f);
         xAxis.setAxisMinimum(0f);
 
         xAxis.setDrawLimitLinesBehindData(true);
@@ -91,24 +91,27 @@ public class GlucoseReportFragment extends Fragment {
     private void setData() {
         ArrayList<Entry> values = new ArrayList<>();
 
-        values.add(new Entry(0, 6.4f));
-        values.add(new Entry(1, 6.4f));
-        values.add(new Entry(2, 6.1f));
-        values.add(new Entry(3, 6.6f));
-        values.add(new Entry(4, 6.8f));
-        values.add(new Entry(5, 6.8f));
-        values.add(new Entry(6, 6.8f));
-        values.add(new Entry(7, 6.9f));
-        values.add(new Entry(8, 7.2f));
-        values.add(new Entry(9, 7.4f));
-        values.add(new Entry(10, 7.3f));
-        values.add(new Entry(11, 7.2f));
-        values.add(new Entry(12, 7.1f));
-        values.add(new Entry(13, 6.8f));
-        values.add(new Entry(14, 6.9f));
-        values.add(new Entry(15, 7.4f));
-        values.add(new Entry(16, 7.4f));
-        values.add(new Entry(17, 7.3f));
+        values.add(new Entry(0f, 6.4f));
+        values.add(new Entry(1f, 6.4f));
+        values.add(new Entry(2f, 6.1f));
+        values.add(new Entry(3f, 6.6f));
+        values.add(new Entry(4f, 6.8f));
+        values.add(new Entry(5f, 6.8f));
+        values.add(new Entry(6f, 6.8f));
+        values.add(new Entry(7f, 6.9f));
+        values.add(new Entry(8f, 7.2f));
+        values.add(new Entry(9f, 7.4f));
+        values.add(new Entry(10f, 7.3f));
+        values.add(new Entry(11f, 7.2f));
+        values.add(new Entry(12f, 7.1f));
+        values.add(new Entry(13f, 6.8f));
+        values.add(new Entry(14f, 6.9f));
+        values.add(new Entry(15f, 7.4f));
+        values.add(new Entry(16f, 7.4f));
+        values.add(new Entry(17f, 7.3f));
+        values.add(new Entry(18f, 7.3f));
+        values.add(new Entry(19f, 7.3f));
+        values.add(new Entry(20f, 7.3f));
 
         LineDataSet set1;
         if (binding.chart.getData() != null &&

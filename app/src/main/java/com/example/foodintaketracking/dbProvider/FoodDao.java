@@ -2,6 +2,7 @@ package com.example.foodintaketracking.dbProvider;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
@@ -20,4 +21,7 @@ public interface FoodDao {
 
     @Query("delete FROM foods")
     void deleteAllFood();
+
+
+
 }

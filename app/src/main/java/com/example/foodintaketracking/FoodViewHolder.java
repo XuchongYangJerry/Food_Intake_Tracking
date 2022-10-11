@@ -23,14 +23,14 @@ import java.io.IOException;
 import java.util.Calendar;
 
 public class FoodViewHolder extends RecyclerView.ViewHolder{
-    private RecyclerviewItemBinding binding;
+    public RecyclerviewItemBinding binding;
 
     public FoodViewHolder(RecyclerviewItemBinding binding){
         super(binding.getRoot());
         this.binding = binding;
     }
 
-    public void bind(String imagePath, String foodName, Double foodEatenPercent, int foodQuantity, String foodCategory, String foodEatenTime){
+    public void bind(String imagePath, String foodName, Double foodEatenPercent, int foodQuantity, String foodEatenTime){
 //        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
 //        Bitmap foodImage = BitmapFactory.decodeFile(imagePath, bmOptions);
 //        foodImage = Bitmap.createScaledBitmap(foodImage, 224, 224,false);
@@ -40,7 +40,7 @@ public class FoodViewHolder extends RecyclerView.ViewHolder{
         binding.textView1.setText(foodName);
         binding.textView2.setText(new StringBuilder().
                 append("Quantity: ").append(foodQuantity).
-                append("\nCategory: ").append(foodCategory).
+                //append("\nCategory: ").append(foodCategory).
                 append("\nConsumption: ").append(foodEatenPercent*100).append("%").
                 append("\nTime: ").append(foodEatenTime).toString());
     }

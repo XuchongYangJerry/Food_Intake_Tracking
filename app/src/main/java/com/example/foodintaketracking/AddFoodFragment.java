@@ -5,6 +5,8 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -101,7 +103,8 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
     String food_name ="";
     float sugar = 0;
     float fat = 0;
-    String nutrition = "";
+    String nutrition1 = "";
+    String nutrition2 = "";
 
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -122,6 +125,23 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
         setUpCameraService();
         saveEatenPercentage();
 
+        binding.foodItemTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                boolean hasFocus = true;
+                if (hasFocus) {
+                    binding.foodItemTextView.requestFocus();
+                    binding.foodItemTextView.setFocusableInTouchMode(true);
+                    binding.foodItemTextView.setFocusable(true);
+                    binding.foodItemTextView.setCursorVisible(true);
+
+                } else {
+                    binding.foodItemTextView.clearFocus();
+                    binding.foodItemTextView.setCursorVisible(false);
+                }
+            }
+        });
+
         // setupSpinners();
         mFoodViewModel = new ViewModelProvider(this).get(FoodViewModel.class);
         mFoodViewModel.getAllFood().observe(getActivity(), newData -> {
@@ -134,33 +154,67 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
         binding.saveMealButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveFoodToRoom();
-                Snackbar.make(getActivity().findViewById(android.R.id.content), "Food item has been added to the database", Snackbar.LENGTH_SHORT)
-                        .setAction("OK", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
 
-                            }
-                        })
-                        .show();
+                AlertDialog.Builder dialog = new AlertDialog.Builder (requireActivity());
+                dialog.setTitle("Confirmation");//设置对话框的标题
+                dialog.setMessage("Do you want to save the data?");
+                dialog.setCancelable(false);
+                dialog.setPositiveButton("Confirm", new DialogInterface. OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
-                String message = nutrition;
-                if (!message.isEmpty() ) {
-                    SharedPreferences sharedPref = requireActivity().getSharedPreferences("Nutrition", requireContext().MODE_PRIVATE);
-                    SharedPreferences.Editor spEditor = sharedPref.edit();
-                    spEditor.putString("nutrition", message);
-                    spEditor.putString("foodName", food_name);
-                    spEditor.putFloat("sugar", sugar);
-                    spEditor.putFloat("fat", fat);
-                    spEditor.apply();
-                }
+                        saveFoodToRoom();
+
+                        String message = nutrition1;
+                        if (!message.isEmpty() ) {
+                            SharedPreferences sharedPref = requireActivity().getSharedPreferences("Nutrition", requireContext().MODE_PRIVATE);
+                            SharedPreferences.Editor spEditor = sharedPref.edit();
+                            spEditor.putString("nutrition1", message);
+                            spEditor.putString("nutrition2", nutrition2);
+                            spEditor.putString("foodName", food_name);
+                            spEditor.putFloat("sugar", sugar);
+                            spEditor.putFloat("fat", fat);
+                            spEditor.apply();
+                        }
+                        binding.foodItemTextView.setText("");
+                        binding.radio100.setChecked(true);
+                        binding.imageView.setImageResource(R.drawable.ic_launcher_foreground);
+                        mealConsumptionMilliseconds = 0L;
+                        binding.photoTimestampTextView.setText("00:00:00");
+                        binding.mealDurTextView.setText("00:00:00");
+                        binding.nutrition1.setText("");
+                        binding.nutrition2.setText("");
+                        binding.reminder.setVisibility(View.VISIBLE);
+                    }
+                });
+                dialog.setNegativeButton("Cancel", new DialogInterface. OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                dialog.show();
+
+            }
+        });
+
+        binding.resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences sharedPref = requireActivity().getSharedPreferences("Nutrition", requireContext().MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.clear();
+                editor.apply();
                 binding.foodItemTextView.setText("");
                 binding.radio100.setChecked(true);
-                binding.imageView.setImageDrawable(null);
+                binding.imageView.setImageResource(R.drawable.ic_launcher_foreground);
                 mealConsumptionMilliseconds = 0L;
                 binding.photoTimestampTextView.setText("00:00:00");
                 binding.mealDurTextView.setText("00:00:00");
-                binding.nutrition.setText("");
+                binding.nutrition1.setText("");
+                binding.nutrition2.setText("");
+                binding.reminder.setVisibility(View.VISIBLE);
+                Toast.makeText(getContext(), "All data has been reset.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -210,17 +264,17 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
         // Upload tensorflow file
         try {
             long time1 = System.currentTimeMillis();
-            Log.e("Start Time", time1 + "ms");
+            // Log.e("Start Time", time1 + "ms");
 
             CkptR50x1Mobilenetv2ExtraLabels1 model = CkptR50x1Mobilenetv2ExtraLabels1.newInstance(requireContext());
             long time2 = System.currentTimeMillis();
-            Log.e("Time for create new instance of model", time2 + "ms");
+            // Log.e("Time for create new instance of model", time2 + "ms");
 
             // Creates inputs for reference.
             TensorImage image = TensorImage.fromBitmap(bitmap);
 
             long time3 = System.currentTimeMillis();
-            Log.e("Time for input image", time3 + "ms");
+            // Log.e("Time for input image", time3 + "ms");
 
             // Runs model inference and gets result.
             CkptR50x1Mobilenetv2ExtraLabels1.Outputs outputs = model.process(image);
@@ -228,7 +282,7 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             Category maxCategory = results.stream().max(Comparator.comparing(Category::getScore)).get();
 
             long time4 = System.currentTimeMillis();
-            Log.e("Time for get detect result", time4 + "ms");
+            // Log.e("Time for get detect result", time4 + "ms");
 
 //            for (Category category: results) {
 //                String label = category.getLabel();
@@ -426,18 +480,34 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
         else{
             foodName = foodItem;
         }
-        Food item = new Food(
-                foodName,
-                photoFile.getAbsolutePath(),
-                Calendar.getInstance().getTime(),
-                selectRadioButton,
-                foodName,
-                "Fruit",
-                1,
-                "testMetric",
-                binding.photoTimestampTextView.getText().toString(),
-                (int)mealConsumptionMilliseconds);
-        mFoodViewModel.insert(item);
+
+        if (photoFile != null) {
+            String foodImgFilePath = photoFile.getAbsolutePath();
+            Food item = new Food(
+                    foodName,
+                    foodImgFilePath,
+                    Calendar.getInstance().getTime(),
+                    selectRadioButton,
+                    foodName,
+                    "Fruit",
+                    1,
+                    "testMetric",
+                    binding.photoTimestampTextView.getText().toString(),
+                    (int) mealConsumptionMilliseconds);
+            mFoodViewModel.insert(item);
+            Snackbar.make(getActivity().findViewById(android.R.id.content), "Food item has been added to the database", Snackbar.LENGTH_SHORT)
+                    .setAction("OK", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                        }
+                    })
+                    .show();
+        }
+        else{
+            Toast.makeText(getContext(), "There is no data.", Toast.LENGTH_SHORT).show();
+        }
+
         //getActivity().getApplicationContext().deleteFile(photoFile.getAbsolutePath());
 
     }
@@ -468,14 +538,10 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
                     mealConsumptionMilliseconds = sharedPreferences.getLong("mealConsumptionMilliseconds", 0L);
                     isMealTimerRunning = sharedPreferences.getBoolean("isMealTimerRunning", false);
                     boolean isImageSet = setFoodImageToView(photoFile);
+                    binding.reminder.setVisibility(View.INVISIBLE);
                     setDateOfPhoto();
                     detectImage(recognitionImage);
                     getNutrition();
-
-//                    SharedViewModel model = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-//                    if (!nutrition.isEmpty()) {
-//                        model.setMessage(nutrition);
-//                    }
 
                     //recogniseFood(recognitionImage);
 
@@ -643,22 +709,25 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
                     FoodNutrition foodNutrition = response.body();
                     Log.w("Success","Response success:" + response.code());
                     if (foodNutrition.getItems().size() != 0) {
-                        String result = "";
-                        result += "Calories: " + foodNutrition.getCalories() + "J                "
+                        String result1 = "";
+                        String result2 = "";
+                        result1 += "Calories: " + foodNutrition.getCalories() + "J                "
                                 + "Sugar: " + foodNutrition.getSugar() + "g\n"
-                                + "Fat: " + foodNutrition.getFat() + "g                         "
-                                + "Protein: " + foodNutrition.getProtein() + "g\n"
+                                + "Fat: " + foodNutrition.getFat() + "g";
+                        result2 += "Protein: " + foodNutrition.getProtein() + "g\n"
                                 + "Cholesterol: " + foodNutrition.getCholesterol() + "mg            "
                                 + "Carbohydrate: " + foodNutrition.getCarbohydrate() + "g";
 
-                        binding.nutrition.setText(result);
+                        binding.nutrition1.setText(result1);
+                        binding.nutrition2.setText(result2);
                         food_name = foodNutrition.getName();
                         sugar = foodNutrition.getSugar();
                         fat = foodNutrition.getFat();
-                        nutrition = result;
+                        nutrition1 = result1;
+                        nutrition2 = result2;
                     }
                     else{
-                        binding.nutrition.setText("Can not find nutrition information");
+                        binding.nutrition1.setText("Can not find nutrition information");
                     }
                 }
                 else {

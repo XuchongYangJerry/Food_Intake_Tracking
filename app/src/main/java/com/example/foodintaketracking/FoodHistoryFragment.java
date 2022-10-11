@@ -12,18 +12,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodintaketracking.databinding.FragmentFoodHistoryBinding;
+import com.example.foodintaketracking.dbProvider.Food;
 import com.example.foodintaketracking.dbProvider.FoodViewModel;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public class FoodHistoryFragment extends Fragment {
     private FragmentFoodHistoryBinding binding;
-
     private FoodViewModel foodViewModel;
+    private ArrayList<Food> foodList;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -39,12 +41,13 @@ public class FoodHistoryFragment extends Fragment {
 
         // Update the cached copy of the foods in the adapter.
         foodViewModel.getAllFood().observe(getViewLifecycleOwner(), adapter::submitList);
-        
+
+
         binding.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 foodViewModel.deleteAll();
-                Toast.makeText(getContext(), "All data was deleted.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "All data has been deleted.", Toast.LENGTH_SHORT).show();
             }
         });
         return view;
