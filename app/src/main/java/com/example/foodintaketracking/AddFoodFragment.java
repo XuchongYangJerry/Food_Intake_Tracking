@@ -50,9 +50,10 @@ import com.example.foodintaketracking.retrofit.FoodNutrition;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
-import com.example.foodintaketracking.ml.CkptR50x1Mobilenetv2ExtraLabels1;
-import com.example.foodintaketracking.ml.Mobilenetv2ExtraLabels1;
-import com.example.foodintaketracking.ml.CkptR50x1ExtraLabels1;
+import com.example.foodintaketracking.ml.R50x1Mobilenetv2ExtraLabels;
+import com.example.foodintaketracking.ml.Mobilenetv2ExtraLabels;
+import com.example.foodintaketracking.ml.R50x1ExtraLabels;
+import com.example.foodintaketracking.ml.LiteModelAiyVisionClassifierFoodV11;
 import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.label.ImageLabel;
@@ -266,7 +267,7 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             long time1 = System.currentTimeMillis();
             // Log.e("Start Time", time1 + "ms");
 
-            CkptR50x1Mobilenetv2ExtraLabels1 model = CkptR50x1Mobilenetv2ExtraLabels1.newInstance(requireContext());
+            R50x1Mobilenetv2ExtraLabels model = R50x1Mobilenetv2ExtraLabels.newInstance(requireContext());
             long time2 = System.currentTimeMillis();
             // Log.e("Time for create new instance of model", time2 + "ms");
 
@@ -277,7 +278,7 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
             // Log.e("Time for input image", time3 + "ms");
 
             // Runs model inference and gets result.
-            CkptR50x1Mobilenetv2ExtraLabels1.Outputs outputs = model.process(image);
+            R50x1Mobilenetv2ExtraLabels.Outputs outputs = model.process(image);
             List<Category> results = outputs.getProbabilityAsCategoryList();
             Category maxCategory = results.stream().max(Comparator.comparing(Category::getScore)).get();
 
@@ -290,13 +291,14 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
 //                int index = category.getIndex();
 //                outputText += label + ":" + confidence + "\n";
 //            }
-            /**
-            DecimalFormat confidence = new DecimalFormat("00.00%");
-            outputText += maxCategory.getLabel() + " : " + confidence.format(maxCategory.getScore());
-            binding.foodItemTextView.setText(outputText);*/
 
-            outputText += maxCategory.getLabel();
+            DecimalFormat confidence = new DecimalFormat("00.0000%");
+            outputText += maxCategory.getLabel() + " : " + confidence.format(maxCategory.getScore());
             binding.foodItemTextView.setText(outputText);
+
+            /**
+            outputText += maxCategory.getLabel();
+            binding.foodItemTextView.setText(outputText);*/
 
             long time5 = System.currentTimeMillis();
             Log.e("Time for set to the view", time5 + "ms");
@@ -310,87 +312,130 @@ public class AddFoodFragment extends Fragment implements AdapterView.OnItemSelec
 
     public void detectImage2(Bitmap bitmap) {
         String outputText = "";
-        try {
-            Mobilenetv2ExtraLabels1 model = Mobilenetv2ExtraLabels1.newInstance(requireContext());
 
-            TensorImage tensorImage = new TensorImage(DataType.FLOAT32);
-            tensorImage.load(bitmap);
-            ByteBuffer byteBuffer = tensorImage.getBuffer();
+        // Upload tensorflow file
+        try {
+            long time1 = System.currentTimeMillis();
+            // Log.e("Start Time", time1 + "ms");
+
+            R50x1ExtraLabels model = R50x1ExtraLabels.newInstance(requireContext());
+            long time2 = System.currentTimeMillis();
+            // Log.e("Time for create new instance of model", time2 + "ms");
+
             // Creates inputs for reference.
-            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32);
-            inputFeature0.loadBuffer(byteBuffer);
+            TensorImage image = TensorImage.fromBitmap(bitmap);
+
+            long time3 = System.currentTimeMillis();
+            // Log.e("Time for input image", time3 + "ms");
 
             // Runs model inference and gets result.
-            Mobilenetv2ExtraLabels1.Outputs outputs = model.process(inputFeature0);
-            TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
+            R50x1ExtraLabels.Outputs outputs = model.process(image);
+            List<Category> results = outputs.getProbabilityAsCategoryList();
+            Category maxCategory = results.stream().max(Comparator.comparing(Category::getScore)).get();
 
-            float[] confidences = outputFeature0.getFloatArray();
-            // find the index of the class with the biggest confidence.
-            int maxPos = 0;
-            float maxConfidence = 0;
-            for (int i = 0; i < confidences.length; i++) {
-                Log.i("model", String.valueOf(confidences[i]));
-                if (confidences[i] > maxConfidence) {
-                    maxConfidence = confidences[i];
-                    maxPos = i;
-                }
-            }
-            String[] labelList = new String[]{"Apple", "Banana", "Orange", "Grape", "Mandarine", "Strawberry", "Blueberry", "Rasberry", "Cherry", "Kiwi", "Pineapple", "Persimmon", "Watermelon",
-                    "Rockmelon", "Pear", "Peach", "Apricot", "Nectarines", "Plum", "Grapefruit", "Pomegranate", "Avacado", "Cumcumber", "Tomato", "Carrot", "Common Fig",
-                    "Dragonfruit", "Papaw", "Passionfruit", "Papaya", "Coffee", "Tea", "orange juice", "smoothie", "milk", "milkshake", "hot chocolate", "energy drink",
-                    "Soft drink", "Juice", "Beer", "Wine", "Liquor", "ice cream", "biscuits", "muffin", "danish", "croissant", "scone"};
+            long time4 = System.currentTimeMillis();
+            // Log.e("Time for get detect result", time4 + "ms");
 
-            DecimalFormat confidence = new DecimalFormat("00.00%");
-            outputText += labelList[maxPos] + ": " + confidence.format(maxConfidence);
-            binding.foodItemTextView.setText(outputText);
+             DecimalFormat confidence = new DecimalFormat("00.00000%");
+             outputText += maxCategory.getLabel() + " : " + confidence.format(maxCategory.getScore());
+             binding.foodItemTextView.setText(outputText);
 
-            // Releases model resources if no longer used.
+            /**
+             outputText += maxCategory.getLabel();
+             binding.foodItemTextView.setText(outputText);*/
+
+            long time5 = System.currentTimeMillis();
+            Log.e("Time for set to the view", time5 + "ms");
+
             model.close();
         } catch (IOException e) {
-            // TODO Handle the exception
+            Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void detectImage3(Bitmap bitmap) {
         String outputText = "";
+
+        // Upload tensorflow file
         try {
-            CkptR50x1ExtraLabels1 model = CkptR50x1ExtraLabels1.newInstance(requireContext());
+            long time1 = System.currentTimeMillis();
+            // Log.e("Start Time", time1 + "ms");
+
+            Mobilenetv2ExtraLabels model = Mobilenetv2ExtraLabels.newInstance(requireContext());
+            long time2 = System.currentTimeMillis();
+            // Log.e("Time for create new instance of model", time2 + "ms");
 
             // Creates inputs for reference.
-            TensorImage tensorImage = new TensorImage(DataType.FLOAT32);
-            tensorImage.load(bitmap);
-            ByteBuffer byteBuffer = tensorImage.getBuffer();
-            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32);
-            inputFeature0.loadBuffer(byteBuffer);
+            TensorImage image = TensorImage.fromBitmap(bitmap);
+
+            long time3 = System.currentTimeMillis();
+            // Log.e("Time for input image", time3 + "ms");
 
             // Runs model inference and gets result.
-            CkptR50x1ExtraLabels1.Outputs outputs = model.process(inputFeature0);
-            TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
+            Mobilenetv2ExtraLabels.Outputs outputs = model.process(image);
+            List<Category> results = outputs.getProbabilityAsCategoryList();
+            Category maxCategory = results.stream().max(Comparator.comparing(Category::getScore)).get();
 
-            float[] confidences = outputFeature0.getFloatArray();
-            // find the index of the class with the biggest confidence.
-            int maxPos = 0;
-            float maxConfidence = 0;
-            for (int i = 0; i < confidences.length; i++) {
-                Log.i("model", String.valueOf(confidences[i]));
-                if (confidences[i] > maxConfidence) {
-                    maxConfidence = confidences[i];
-                    maxPos = i;
-                }
-            }
-            String[] labelList = new String[]{"Apple", "Banana", "Orange", "Grape", "Mandarine", "Strawberry", "Blueberry", "Rasberry", "Cherry", "Kiwi", "Pineapple", "Persimmon", "Watermelon",
-                    "Rockmelon", "Pear", "Peach", "Apricot", "Nectarines", "Plum", "Grapefruit", "Pomegranate", "Avacado", "Cumcumber", "Tomato", "Carrot", "Common Fig",
-                    "Dragonfruit", "Papaw", "Passionfruit", "Papaya", "Coffee", "Tea", "orange juice", "smoothie", "milk", "milkshake", "hot chocolate", "energy drink",
-                    "Soft drink", "Juice", "Beer", "Wine", "Liquor", "ice cream", "biscuits", "muffin", "danish", "croissant", "scone"};
+            long time4 = System.currentTimeMillis();
+            // Log.e("Time for get detect result", time4 + "ms");
 
-            DecimalFormat confidence = new DecimalFormat("00.00%");
-            outputText += labelList[maxPos] + ": " + confidence.format(maxConfidence);
+            DecimalFormat confidence = new DecimalFormat("00.00000%");
+            outputText += maxCategory.getLabel() + " : " + confidence.format(maxCategory.getScore());
             binding.foodItemTextView.setText(outputText);
 
-            // Releases model resources if no longer used.
+            /**
+             outputText += maxCategory.getLabel();
+             binding.foodItemTextView.setText(outputText);*/
+
+            long time5 = System.currentTimeMillis();
+            Log.e("Time for set to the view", time5 + "ms");
+
             model.close();
         } catch (IOException e) {
-            // TODO Handle the exception
+            Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void detectImage4(Bitmap bitmap) {
+        String outputText = "";
+
+        // Upload tensorflow file
+        try {
+            long time1 = System.currentTimeMillis();
+            // Log.e("Start Time", time1 + "ms");
+
+            LiteModelAiyVisionClassifierFoodV11 model = LiteModelAiyVisionClassifierFoodV11.newInstance(requireContext());
+            long time2 = System.currentTimeMillis();
+            // Log.e("Time for create new instance of model", time2 + "ms");
+
+            // Creates inputs for reference.
+            TensorImage image = TensorImage.fromBitmap(bitmap);
+
+            long time3 = System.currentTimeMillis();
+            // Log.e("Time for input image", time3 + "ms");
+
+            // Runs model inference and gets result.
+            LiteModelAiyVisionClassifierFoodV11.Outputs outputs = model.process(image);
+            List<Category> results = outputs.getProbabilityAsCategoryList();
+            Category maxCategory = results.stream().max(Comparator.comparing(Category::getScore)).get();
+
+            long time4 = System.currentTimeMillis();
+            // Log.e("Time for get detect result", time4 + "ms");
+
+            DecimalFormat confidence = new DecimalFormat("00.00000%");
+            outputText += maxCategory.getLabel() + " : " + confidence.format(maxCategory.getScore());
+            binding.foodItemTextView.setText(outputText);
+
+            /**
+             outputText += maxCategory.getLabel();
+             binding.foodItemTextView.setText(outputText);*/
+
+            long time5 = System.currentTimeMillis();
+            Log.e("Time for set to the view", time5 + "ms");
+
+            model.close();
+        } catch (IOException e) {
+            Toast.makeText(getActivity(), "Detection failed.", Toast.LENGTH_SHORT).show();
         }
     }
 
